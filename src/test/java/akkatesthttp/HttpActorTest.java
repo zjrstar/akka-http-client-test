@@ -4,6 +4,8 @@ import static akkatesthttp.DummyHttpServer.SecureMode.HTTP;
 
 import akka.actor.ActorSystem;
 import akka.actor.Terminated;
+import akka.stream.ActorMaterializer;
+import akka.stream.Materializer;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import org.junit.AfterClass;
@@ -15,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpActorTest {
   private static ActorSystem system;
+  private static Materializer materializer;
   private static DummyHttpServer dummyHttpServer = new DummyHttpServer(HTTP);
 
   private TestActorRef<HttpActor.HttpActorFSM> fsmActor;
@@ -24,6 +27,7 @@ public class HttpActorTest {
   public static void beforeClass() throws Exception {
     dummyHttpServer.start();
     system = ActorSystem.create("test");
+    materializer = ActorMaterializer.create(system);
   }
 
   @AfterClass
@@ -66,6 +70,6 @@ public class HttpActorTest {
 
   private void initFsmActor() {
     fsmActor = TestActorRef.create(system,
-        HttpActor.props());
+        HttpActor.props(materializer));
   }
 }

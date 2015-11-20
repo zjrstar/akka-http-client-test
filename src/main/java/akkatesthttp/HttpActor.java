@@ -10,6 +10,7 @@ import akka.http.javadsl.Http;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
 import akka.stream.ActorMaterializer;
+import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -59,14 +60,15 @@ public class HttpActor {
     }
   }
 
-  public static Props props() {
-    return Props.create(HttpActorFSM.class, HttpActorFSM::new);
+  public static Props props(Materializer mat) {
+    return Props.create(HttpActorFSM.class, mat);
   }
 
   public static class HttpActorFSM extends AbstractLoggingFSM<AS, Data> {
-    final ActorMaterializer mat = ActorMaterializer.create(context());
+    private final Materializer mat;
 
-    public HttpActorFSM() {
+    public HttpActorFSM(Materializer mat) {
+      this.mat = mat;
 
       FiniteDuration timeout = new FiniteDuration(10, TimeUnit.SECONDS);
 
@@ -138,7 +140,7 @@ public class HttpActor {
         return httpAbort(data);
 
       } finally {
-        mat.shutdown();
+        //mat.shutdown();
       }
     }
 
